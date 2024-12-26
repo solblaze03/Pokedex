@@ -6,9 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.pokedex.Navigation.navigationWrapper
 import com.example.pokedex.ui.theme.PokedexTheme
+import com.example.pokedex.viewModel.VMPokedex
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+
+private val viewModel: VMPokedex = VMPokedex()
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -18,7 +21,7 @@ class MainActivity : ComponentActivity() {
         auth = Firebase.auth
         setContent {
             PokedexTheme {
-                 navigationWrapper(auth)
+                 navigationWrapper(auth, viewModel)
             }
         }
     }

@@ -131,7 +131,7 @@ fun Login(
 
             Button(
                 onClick = {
-                    viewModel.iniciarSesion { cargarPantallaPrincipal() ;};
+                    if(user.isNotEmpty() && pass.isNotEmpty())viewModel.iniciarSesion { cargarPantallaPrincipal() ;};
 
                     viewModel.resetLogin()
 

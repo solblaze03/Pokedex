@@ -7,15 +7,30 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.pokedex.Clases.Pokemon
+import com.example.pokedex.Clases.Pokemondetail
+import com.example.pokedex.Clases.RetrofitChainInstance
 import com.example.pokedex.Clases.RetrofitInstance
+import com.example.pokedex.Clases.RetrofitInstanceDetail
+import com.example.pokedex.Clases.RetrofitInstanceEvolution
+import com.example.pokedex.Clases.pokeApiEvolShain
+import com.example.pokedex.Clases.pokeApiEvolution
 import com.example.pokedex.Clases.pokeApiList
 import com.google.firebase.auth.FirebaseAuth
 import retrofit2.Call
 import retrofit2.Response
 
 class VMPokedex : ViewModel() {
+
+
+
     private val _user = MutableLiveData<String>()
     val user : LiveData<String> = _user
+
+
+
+
+
+
     private val _pass = MutableLiveData<String>()
     val pass : LiveData<String> = _pass
 
@@ -32,11 +47,32 @@ class VMPokedex : ViewModel() {
 
     private val apiservice = RetrofitInstance.api
 
+    private val _pokemonDetail = MutableLiveData<Pokemondetail?>()
+    val pokemondetail : LiveData<Pokemondetail?> = _pokemonDetail
+
 
     private val _loginState = MutableLiveData<LoginState>()
     val loginState : LiveData<LoginState> = _loginState
 
+    private val _evolution = MutableLiveData<pokeApiEvolution?>()
+    val evolution : LiveData<pokeApiEvolution?> = _evolution
+
     private val auth : FirebaseAuth = FirebaseAuth.getInstance()
+
+    private val _chain = MutableLiveData<pokeApiEvolShain?>()
+    val chain : MutableLiveData<pokeApiEvolShain?> = _chain
+
+    private val _PokeSeleccionado = MutableLiveData<Boolean>()
+    val Pokeseleccionado : LiveData<Boolean> = _PokeSeleccionado
+
+
+    fun pokeSeleccionado(selecc : Boolean){
+        _PokeSeleccionado.value = selecc
+    }
+
+    fun resetPokemonDetail(){
+        _pokemonDetail.value = null
+    }
 
     fun verificarUser(user : String, pass : String){
         _user.value = user
@@ -58,6 +94,7 @@ class VMPokedex : ViewModel() {
                 cargarPantallaPrincipal()
             }else{
                 _loginState.value = LoginState.Error(it.exception?.message ?: "Error desconocido")
+
             }
         }
     }
@@ -76,7 +113,13 @@ class VMPokedex : ViewModel() {
         _loginState.value = LoginState.Idle
     }
 
+    fun resetEvol(){
+        _chain.value = null
+    }
 
+    fun resetPokeEvolution(){
+        _evolution.value = null
+    }
 
     fun fetchPokemonList(limit: Int) {
         apiservice.getPokemonList(limit).enqueue(object : retrofit2.Callback<pokeApiList> {
@@ -90,6 +133,49 @@ class VMPokedex : ViewModel() {
                 //error
             }
 
+
+        })
+    }
+
+    fun fetchPokemonDetailType(id: Int){
+        RetrofitInstanceDetail.service.getPokemonsDetail(id).enqueue(object : retrofit2.Callback<Pokemondetail>{
+            override fun onResponse(call: Call<Pokemondetail>, response: Response<Pokemondetail>) {
+                _pokemonDetail.value = response.body()
+            }
+
+            override fun onFailure(call: Call<Pokemondetail>, t: Throwable) {
+            }
+        })
+    }
+
+    fun fetchPokemonEvolution(id: Int){
+        RetrofitInstanceEvolution.service.getEvolutionChain(id).enqueue(object : retrofit2.Callback<pokeApiEvolution>{
+            override fun onResponse(
+                call: Call<pokeApiEvolution>,
+                response: Response<pokeApiEvolution>
+            ) {
+                _evolution.value = response.body()
+            }
+
+            override fun onFailure(call: Call<pokeApiEvolution>, t: Throwable) {
+
+            }
+
+        })
+    }
+
+    fun fetchPokemonChain(id: Int){
+        RetrofitChainInstance.service.getChain(id).enqueue(object : retrofit2.Callback<pokeApiEvolShain>{
+            override fun onResponse(
+                call: Call<pokeApiEvolShain>,
+                response: Response<pokeApiEvolShain>
+            ) {
+                _chain.value = response.body()
+            }
+
+            override fun onFailure(call: Call<pokeApiEvolShain>, t: Throwable) {
+
+            }
 
         })
     }

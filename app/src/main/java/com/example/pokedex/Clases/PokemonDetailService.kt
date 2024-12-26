@@ -6,5 +6,5 @@ import retrofit2.http.Url
 
 interface PokemonDetailsService {
     @GET
-    fun getPokemonDetails(@Url url: String): Call<PokemonDetails>
+    fun getPokemonDetails(@Url url: String): Call<Pokemondetail>
 }

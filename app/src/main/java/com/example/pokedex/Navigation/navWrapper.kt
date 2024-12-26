@@ -16,10 +16,9 @@ import com.example.pokedex.viewModel.VMPokedex
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
-private var viewModel: VMPokedex = VMPokedex()
 
 @Composable
-fun navigationWrapper(auth: FirebaseAuth) {
+fun navigationWrapper(auth: FirebaseAuth, viewModel: VMPokedex) {
     val navController = rememberNavController()
     val currentUser: FirebaseUser? = auth.currentUser
 
@@ -34,24 +33,26 @@ fun navigationWrapper(auth: FirebaseAuth) {
                     viewModel,
                     auth,
                     { navController.navigate(Registro) },
-                    { navController.navigate(principal) })
+                    { navController.navigate(principal) { popUpTo(0){inclusive = true}} })
             }
             composable<Registro>() {
                 Registro(
                     viewModel,
                     auth,
                     { navController.navigate(Login) { popUpTo<Login> { inclusive = true } } },
-                    { navController.navigate(principal) }
+                    { navController.navigate(principal)  {popUpTo(0){inclusive = true}} }
                 )
             }
             composable<principal> {
-                pantallaPrincipal(auth, viewModel) {e -> navController.navigate(detallePokemon(e))}
+                pantallaPrincipal(auth, viewModel) { e -> navController.navigate(detallePokemon(e))}
             }
-            composable<detallePokemon> { backStackentry ->
-                val pokemon = backStackentry.destination.route
-                if (pokemon != null) {
-                    detallePokemons(pokemon) { navController.popBackStack() }
-                }
+            composable<detallePokemon> {
+                val pokemon = it.toRoute<detallePokemon>()
+
+                detallePokemons(pokemon.pokemon,{ navController.popBackStack() },
+                    viewModel
+                )
+
             }
         }
     } else {
@@ -66,7 +67,9 @@ fun navigationWrapper(auth: FirebaseAuth) {
             composable<detallePokemon> {
                 val pokemon = it.toRoute<detallePokemon>()
 
-                    detallePokemons(pokemon.pokemon) {navController.popBackStack()}
+                    detallePokemons(pokemon.pokemon,{ navController.popBackStack() },
+                        viewModel
+                    )
 
             }
         }

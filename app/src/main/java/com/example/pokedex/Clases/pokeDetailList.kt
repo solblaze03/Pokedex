@@ -1,17 +1,8 @@
 package com.example.pokedex.Clases
 
-data class PokemonDetails(
-    val sprites: Sprites
-)
 
-data class Sprites(
-    val other: OtherSprites
-)
 
-data class OtherSprites(
-    val dream_world: DreamWorld
-)
+data class Type(val name: String, val url: String)
 
-data class DreamWorld(
-    val front_default: String?
-)
+data class TypeSlot( val slot: Int, val type: Type )
+data class Pokemondetail( val types: List<TypeSlot> )

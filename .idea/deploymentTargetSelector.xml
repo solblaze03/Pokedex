@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-12-07T17:57:50.598453600Z">
+        <DropdownSelection timestamp="2024-12-26T11:00:14.839034300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=f1a1de68" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\maico\.android\avd\Pixel_3_API_35.avd" />
             </handle>
           </Target>
         </DropdownSelection>
