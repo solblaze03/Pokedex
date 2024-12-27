@@ -71,7 +71,7 @@ fun Login(
         Spacer(modifier = Modifier.weight(0.5f))
         Column(
             modifier = Modifier
-                .weight(0.85f)
+                .weight(0.93f)
                 .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -151,6 +151,7 @@ fun Login(
 
             Spacer(Modifier.padding(9.dp))
             Text("Crear cuenta", color = Color.White, modifier = Modifier.clickable { Registrar() })
+
         }
 
     }

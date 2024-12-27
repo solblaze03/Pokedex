@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -61,6 +63,7 @@ import com.example.pokedex.Clases.Pokemondetail
 import com.example.pokedex.Clases.Pokemoninfo
 import com.example.pokedex.Clases.pokeApiEvolShain
 import com.example.pokedex.Clases.pokeApiEvolution
+import com.example.pokedex.Clases.pokeFlavorText
 import com.example.pokedex.R
 import com.example.pokedex.colors.listColors
 import com.example.pokedex.viewModel.VMPokedex
@@ -78,7 +81,7 @@ fun detallePokemons(pokemon: String, regresarPantalla: () -> Boolean, viewModel:
     val chain by viewModel.chain.observeAsState()
     var num by remember { mutableStateOf(0) }
     var pokemonEvolucionSeleccionado by remember { mutableStateOf(0) }
-
+    val pokemonFlavor by viewModel.flavor.observeAsState()
 
     val mediaplayer = remember { MediaPlayer() }
     var reproduciendo by remember { mutableStateOf(false) }
@@ -86,7 +89,7 @@ fun detallePokemons(pokemon: String, regresarPantalla: () -> Boolean, viewModel:
     LaunchedEffect(Unit) {
         mediaplayer.apply {
             setDataSource("https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemonSelecc.numero}.ogg")
-            setOnPreparedListener{
+            setOnPreparedListener {
                 start()
                 reproduciendo = true
             }
@@ -94,6 +97,7 @@ fun detallePokemons(pokemon: String, regresarPantalla: () -> Boolean, viewModel:
         }
         viewModel.fetchPokemonDetailType(pokemonSelecc.numero.toInt())
         viewModel.fetchPokemonChain(pokemonSelecc.numero.toInt())
+        viewModel.fetchPokemonFlavor(pokemonSelecc.numero.toInt())
 
     }
 
@@ -124,7 +128,7 @@ fun detallePokemons(pokemon: String, regresarPantalla: () -> Boolean, viewModel:
 
 
 
-    if (detailPokemon.value != null) {
+    if (detailPokemon.value != null && pokemonFlavor != null) {
         Scaffold(
             topBar = { topBarDetail(pokemonSelecc, { regresarPantalla() }, colorPokemonElemento) },
             content = { e ->
@@ -135,7 +139,9 @@ fun detallePokemons(pokemon: String, regresarPantalla: () -> Boolean, viewModel:
                     detailPokemon,
                     colorPokemonElemento,
                     pokeEvolution,
-                    chain, pokemonEvolucionSeleccionado
+                    chain,
+                    pokemonEvolucionSeleccionado,
+                    pokemonFlavor!!
                 )
             }
         )
@@ -161,124 +167,115 @@ fun content(
     colorPokemonElemento: String,
     pokeEvolution: State<pokeApiEvolution?>,
     chain: pokeApiEvolShain?,
-    numEvolucion: Int
+    numEvolucion: Int,
+    pokemnFlavor: pokeFlavorText
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(330.dp)
-                .padding(top = 60.dp)
-                .offset(y = (-(0).dp)),
-            shape = RoundedCornerShape(40.dp),
-            colors = CardDefaults.cardColors(containerColor = colorElemento(colorPokemonElemento))
+    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(bottom = 50.dp)) {
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+                    .padding(top = 40.dp)
+                    .offset(y = ((10).dp)),
+                shape = RoundedCornerShape(40.dp),
+                colors = CardDefaults.cardColors(containerColor = colorElemento(colorPokemonElemento))
 
 
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(pokemon.imagen)
-                        .placeholder(R.drawable.pokemon).build(),
-                    contentDescription = "Charizard", modifier = Modifier.size(210.dp)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.padding(15.dp))
-        Text(pokemon.nombre.capitalize(), fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
-
-
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row(modifier = Modifier.padding(start = 50.dp, end = 50.dp)) {
-            detailPokemon.value.let { pokemondetail ->
-                pokemondetail?.types?.forEach { e ->
-
-                    Text(
-                        traducirElemento(e.type.name),
-                        modifier = Modifier
-                            .background(
-                                color = colorElemento(e.type.name),
-                                shape = RoundedCornerShape(15.dp)
-                            )
-                            .padding(top = 3.dp, bottom = 3.dp)
-                            .weight(1f),
-                        textAlign = TextAlign.Center
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current).data(pokemon.imagen)
+                            .placeholder(R.drawable.pokemon).build(),
+                        contentDescription = "Charizard", modifier = Modifier.size(210.dp)
                     )
-                    Spacer(modifier = Modifier.padding(5.dp))
                 }
             }
-        }
+            Spacer(modifier = Modifier.padding(15.dp))
+            Text(pokemon.nombre.capitalize(), fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
 
-        Spacer(modifier = Modifier.padding(12.dp))
-        val array = chain?.evolution_chain?.url?.split("/")
-        val num by remember { mutableStateOf(array?.get(array?.size?.minus(2) ?: 0)?.toInt()) }
-        LaunchedEffect(Unit) {
 
-        }
-        Text("Evoluciones")
-        if (pokeEvolution.value != null && num != 0) {
-            LazyRow {
-                item {
-                    pokeEvolution.value.let { pokeApiEvolution ->
-                        OutlinedCard(
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row(modifier = Modifier.padding(start = 50.dp, end = 50.dp)) {
+                detailPokemon.value.let { pokemondetail ->
+                    pokemondetail?.types?.forEach { e ->
+
+                        Text(
+                            traducirElemento(e.type.name),
                             modifier = Modifier
-                                .width(130.dp)
-                                .height(170.dp)
-                                .padding(5.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .paint(
-                                        painter = painterResource(R.drawable.imagedark),
-                                        contentScale = ContentScale.Crop
-                                    ),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                var array = pokeApiEvolution?.chain?.species?.url?.split("/")
-                                val numeroPokemon = array?.get(array.size - 2)
+                                .background(
+                                    color = colorElemento(e.type.name),
+                                    shape = RoundedCornerShape(15.dp)
+                                )
+                                .padding(top = 3.dp, bottom = 3.dp)
+                                .weight(1f),
+                            textAlign = TextAlign.Center, color = Color.White
+                        )
+                        Spacer(modifier = Modifier.padding(5.dp))
+                    }
+                }
+            }
 
-                                val imagen =
-                                    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$numeroPokemon.png"
-                                cargarImagen(imagen, Modifier.width(100.dp))
-                                Text(pokeApiEvolution?.chain?.species?.name?.capitalize() ?: "")
-                            }
+            Spacer(modifier = Modifier.padding(15.dp))
+            val array = chain?.evolution_chain?.url?.split("/")
+            val num by remember { mutableStateOf(array?.get(array?.size?.minus(2) ?: 0)?.toInt()) }
+            var flavorinfo = false
+            val flavorTextpoke = pokemnFlavor.flavor_text_entries
+            Text("Descripción", fontSize = 24.sp)
+            flavorTextpoke.forEach { e ->
+                if (e.language.name.equals("es") && !flavorinfo  ){
+                    Text(e.flavor_text.replace("\n"," "), modifier = Modifier.padding(20.dp), fontSize = 16.sp, textAlign = TextAlign.Left,)
+                    flavorinfo = true
 
-                        }
-                        pokeApiEvolution?.chain?.evolves_to?.forEach { e ->
+                }
+
+            }
+
+
+
+
+            Text("Evoluciones", fontSize = 24.sp)
+            if (pokeEvolution.value != null && num != 0) {
+                val isDarkTheme = isSystemInDarkTheme()
+                val imagenFondoCard = if (isDarkTheme) R.drawable.imagedark else {
+                    R.drawable.fondopokemon
+                }
+                LazyRow {
+                    item {
+                        pokeEvolution.value.let { pokeApiEvolution ->
                             OutlinedCard(
                                 modifier = Modifier
                                     .width(130.dp)
                                     .height(170.dp)
                                     .padding(5.dp)
                             ) {
+
+
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .paint(
-                                            painter = painterResource(R.drawable.imagedark),
+                                            painter = painterResource(imagenFondoCard),
                                             contentScale = ContentScale.Crop
                                         ),
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    var array = e.species?.url?.split("/")
+                                    var array = pokeApiEvolution?.chain?.species?.url?.split("/")
                                     val numeroPokemon = array?.get(array.size - 2)
 
                                     val imagen =
                                         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$numeroPokemon.png"
                                     cargarImagen(imagen, Modifier.width(100.dp))
-                                    Text(e.species?.name?.capitalize() ?: "")
+                                    Text(pokeApiEvolution?.chain?.species?.name?.capitalize() ?: "",fontWeight = FontWeight.Bold)
                                 }
 
                             }
-                            e.evolves_to.forEach { e ->
-
-
+                            pokeApiEvolution?.chain?.evolves_to?.forEach { e ->
                                 OutlinedCard(
                                     modifier = Modifier
                                         .width(130.dp)
@@ -289,46 +286,77 @@ fun content(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .paint(
-                                                painter = painterResource(R.drawable.imagedark),
+                                                painter = painterResource(imagenFondoCard),
                                                 contentScale = ContentScale.Crop
                                             ),
                                         verticalArrangement = Arrangement.Center,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        var array = e?.species?.url?.split("/")
+                                        var array = e.species?.url?.split("/")
                                         val numeroPokemon = array?.get(array.size - 2)
 
                                         val imagen =
                                             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$numeroPokemon.png"
                                         cargarImagen(imagen, Modifier.width(100.dp))
-                                        Text(e.species?.name?.capitalize() ?: "")
+                                        Text(e.species?.name?.capitalize() ?: "", fontWeight = FontWeight.Bold)
                                     }
 
                                 }
+                                e.evolves_to.forEach { e ->
 
 
+                                    OutlinedCard(
+                                        modifier = Modifier
+                                            .width(130.dp)
+                                            .height(170.dp)
+                                            .padding(5.dp)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .paint(
+                                                    painter = painterResource(imagenFondoCard),
+                                                    contentScale = ContentScale.Crop
+                                                ),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            var array = e?.species?.url?.split("/")
+                                            val numeroPokemon = array?.get(array.size - 2)
+
+                                            val imagen =
+                                                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$numeroPokemon.png"
+                                            cargarImagen(imagen, Modifier.width(100.dp))
+                                            Text(e.species?.name?.capitalize() ?: "",fontWeight = FontWeight.Bold)
+                                        }
+
+                                    }
+
+
+                                }
                             }
+
+
                         }
-
-
                     }
                 }
+
+            } else {
+                    Spacer(modifier = Modifier.padding(20.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(78.dp)
+                            .offset(y = (0).dp)
+                    )
+
             }
-        } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(78.dp)
-                        .offset(y = (-50).dp)
-                )
+            if (numEvolucion != 0) {
+                LaunchedEffect(Unit) {
+                    viewModel.fetchPokemonEvolution(numEvolucion)
+                }
             }
         }
-        if (numEvolucion != 0) {
-            LaunchedEffect(Unit) {
-                viewModel.fetchPokemonEvolution(numEvolucion)
-            }
-        }
+
 
 
     }
@@ -362,12 +390,12 @@ fun topBarDetail(
                         content = {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                contentDescription = ""
+                                contentDescription = "", tint = Color.White
                             )
                         })
                     Text(
                         "Pokedex",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold, color = Color.White
                     )
                 }
                 Text(
@@ -377,7 +405,7 @@ fun topBarDetail(
                         .padding(end = 35.dp),
                     textAlign = TextAlign.End,
                     fontSize = 21.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold, color = Color.White
                 )
             }
         }

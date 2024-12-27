@@ -72,7 +72,7 @@ fun Registro(
         Spacer(modifier = Modifier.weight(0.5f))
         Column(
             modifier = Modifier
-                .weight(0.85f)
+                .weight(0.93f)
                 .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             horizontalAlignment = Alignment.CenterHorizontally
