@@ -70,7 +70,6 @@ fun navigationWrapper(auth: FirebaseAuth, viewModel: VMPokedex) {
                     detallePokemons(pokemon.pokemon,{ navController.popBackStack() },
                         viewModel
                     )
-
             }
         }
     }

@@ -20,6 +20,7 @@ uiTextGoogleFonts = "1.7.5"
 runtimeLivedata = "1.7.5"
 kotlinxSerialization = "1.6.3"
 firebaseAuthKtx = "23.1.0"
+gms = "4.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,4 +60,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrainsKotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+gms = {id = "com.google.gms.google-services", version.ref = "gms"}
 
